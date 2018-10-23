@@ -1,3 +1,8 @@
+
+# 基本情報
+
+* Go Version: 1.11.1
+
 # 環境変数を設定する
 
 fish shell (~/.conf/fish/config.fish)
