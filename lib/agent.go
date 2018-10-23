@@ -3,10 +3,8 @@ package lib
 import (
 	"crypto/tls"
 	"fmt"
-	"io"
-	"io/ioutil"
 	"log"
-	
+
 	"github.com/develop/imap-agent/config"
 
 	"github.com/emersion/go-imap"
@@ -17,7 +15,7 @@ import (
 func Do() {
 	log.Println("Connecting to server...")
 
-	conf := config.NewConfig()
+	conf := config.NewIMAPConfig()
 	connStr := fmt.Sprintf("%s:%s", conf.Host, conf.Port)
 
 	// 本番運用の際はスキップしてよいのか確認すること
@@ -55,7 +53,7 @@ func Do() {
 	}
 
 	// Select INBOX
-	mbox, err := c.Select("INBOX", true)
+	mbox, err := c.Select("[Gmail]/すべてのメール", true)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -84,10 +82,10 @@ func Do() {
 		fmt.Println("-- ", msg.Body)
 
 		seqSet4Body := new(imap.SeqSet)
-		fmt.Println("seqnum: ", msg.SeqNum)
-		fmt.Println("body: ", msg.Body)
-		fmt.Println("items: ", msg.Items)
-		fmt.Println("body: ", msg.Envelope)
+		//fmt.Println("seqnum: ", msg.SeqNum)
+		//fmt.Println("body: ", msg.Body)
+		//fmt.Println("items: ", msg.Items)
+		//fmt.Println("body: ", msg.Envelope)
 		seqSet4Body.AddNum(msg.SeqNum)
 		
 		section := &imap.BodySectionName{}
@@ -136,25 +134,25 @@ func Do() {
 		}
 
 		// Process each message's part
-		for {
-			p, err := mr.NextPart()
-			if err == io.EOF {
-				break
-			} else if err != nil {
-				log.Fatal(err)
-			}
-
-			switch h := p.Header.(type) {
-			case mail.TextHeader:
-				// This is the message's text (can be plain-text or HTML)
-				b, _ := ioutil.ReadAll(p.Body)
-				log.Println("Got text: %v", string(b))
-			case mail.AttachmentHeader:
-				// This is an attachment
-				filename, _ := h.Filename()
-				log.Println("Got attachment: %v", filename)
-			}
-		}
+		//for {
+		//	p, err := mr.NextPart()
+		//	if err == io.EOF {
+		//		break
+		//	} else if err != nil {
+		//		log.Fatal(err)
+		//	}
+		//
+		//	switch h := p.Header.(type) {
+		//	case mail.TextHeader:
+		//		// This is the message's text (can be plain-text or HTML)
+		//		b, _ := ioutil.ReadAll(p.Body)
+		//		log.Println("Got text: %v", string(b))
+		//	case mail.AttachmentHeader:
+		//		// This is an attachment
+		//		filename, _ := h.Filename()
+		//		log.Println("Got attachment: %v", filename)
+		//	}
+		//}
 
 	}
 
