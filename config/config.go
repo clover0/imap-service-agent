@@ -9,12 +9,7 @@ import (
 var Conf Config
 
 type Config struct {
-	DB DataBaseConfig
-	Host string
-	Port string
-	User string
-	Password string
-	Tlsn string
+	DB DataBaseConfig `toml:"database"`
 }
 
 type IMAPConfig struct {
@@ -27,7 +22,7 @@ type IMAPConfig struct {
 
 type DataBaseConfig struct {
 	Host string `toml:"host"`
-	Port string `toml:"port"`
+	Port int `toml:"port"`
 }
 
 // 環境変数として設定しておくこと
