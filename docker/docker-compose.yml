@@ -1,0 +1,11 @@
+version: '3.3'
+services:
+  # postgresql
+  postgresql: #https://hub.docker.com/_/postgres/
+    image: postgres:10.5
+    volumes:
+    - data-postgresql-imap-agent
+    ports:
+    - "35432:5432"
+    environment:
+      POSTGRES_PASSWORD: password # postgres root user のパスワード
