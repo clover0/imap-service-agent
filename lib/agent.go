@@ -12,6 +12,8 @@ import (
 	"github.com/emersion/go-message/mail"
 )
 
+const FolderName = "INBOX"
+
 func Do() {
 	log.Println("Connecting to server...")
 
@@ -53,20 +55,16 @@ func Do() {
 	}
 
 	// Select INBOX
-	mbox, err := c.Select("[Gmail]/すべてのメール", true)
+	mbox, err := c.Select(FolderName, false)
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("Flags for INBOX:", mbox.Flags)
+	log.Println("Flags for " + FolderName , mbox.Flags)
 
-	// Get the last 4 messages
+	// Get messages
 	from := uint32(1)
 	to := mbox.Messages
-	if mbox.Messages > 3 {
-		//We're using unsigned integers here, only substract if the result is > 0
-		from = mbox.Messages - 3
-	}
-	
+
 	seqset := new(imap.SeqSet)
 	seqset.AddRange(from, to)
 
@@ -79,25 +77,19 @@ func Do() {
 	log.Println("Last 4 messages:")
 	for msg := range messages {
 		log.Println("* " + msg.Envelope.Subject)
-		fmt.Println("-- ", msg.Body)
 
 		seqSet4Body := new(imap.SeqSet)
-		//fmt.Println("seqnum: ", msg.SeqNum)
-		//fmt.Println("body: ", msg.Body)
-		//fmt.Println("items: ", msg.Items)
-		//fmt.Println("body: ", msg.Envelope)
-		seqSet4Body.AddNum(msg.SeqNum)
+		seqSet4Body.AddNum(mbox.Messages)
+		fmt.Println(mbox.Messages)
 		
 		section := &imap.BodySectionName{}
 		items := []imap.FetchItem{section.FetchItem()}
 
-		messageBody := make(chan *imap.Message)
-		done3 := make(chan error, 1)
+		messageBody := make(chan *imap.Message, 1)
 		go func() {
-			done3 <- c.Fetch(seqSet4Body, items, messageBody)
-			//if err := c.Fetch(seqSet4Body, items, messageBody); err != nil {
-			//	log.Fatal(err)
-			//}
+			if err := c.Fetch(seqSet4Body, items, messageBody); err != nil {
+				log.Fatal(err)
+			}
 		}()
 		body := <- messageBody
 
@@ -105,8 +97,6 @@ func Do() {
 			log.Fatal("Server didn't returned message")
 		}
 		
-		fmt.Println("-- ", body)
-
 		r := body.GetBody(section)
 		if r == nil {
 			log.Fatal("Server didn't returned message body")
