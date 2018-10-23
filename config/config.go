@@ -1,13 +1,13 @@
-package lib
+package config
 
 import "os"
 
 type Config struct {
-	host string
-	port string
-	user string
-	password string
-	tlsn string
+	Host string
+	Port string
+	User string
+	Password string
+	Tlsn string
 }
 
 // 環境変数として設定しておくこと
@@ -19,8 +19,8 @@ func NewConfig() Config {
 		os.Getenv("IMAP_AGENT_PJ_IMAP_PASS"),
 		os.Getenv("IMAP_AGENT_PJ_IMAP_TLS_SERVERNAME"),
 	}
-	if c.port == "" {
-		c.port = "993"
+	if c.Port == "" {
+		c.Port = "993"
 	}
 	return c
 }

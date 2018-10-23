@@ -3,24 +3,27 @@ package lib
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/emersion/go-imap"
-	"github.com/emersion/go-imap/client"
-	"github.com/emersion/go-message/mail"
 	"io"
 	"io/ioutil"
 	"log"
+	
+	"github.com/develop/imap-agent/config"
+
+	"github.com/emersion/go-imap"
+	"github.com/emersion/go-imap/client"
+	"github.com/emersion/go-message/mail"
 )
 
 func Do() {
 	log.Println("Connecting to server...")
 
-	conf := NewConfig()
-	connStr := fmt.Sprintf("%s:%s", conf.host, conf.port)
+	conf := config.NewConfig()
+	connStr := fmt.Sprintf("%s:%s", conf.Host, conf.Port)
 
 	// 本番運用の際はスキップしてよいのか確認すること
 	tlsc := &tls.Config{InsecureSkipVerify: true}
-	if conf.tlsn != "" {
-		tlsc.ServerName = conf.tlsn
+	if conf.Tlsn != "" {
+		tlsc.ServerName = conf.Tlsn
 	}
 
 	// Connect to server
@@ -34,7 +37,7 @@ func Do() {
 	defer c.Logout()
 
 	// Login
-	if err := c.Login(conf.user, conf.password); err != nil {
+	if err := c.Login(conf.User, conf.Password); err != nil {
 		log.Fatal(err)
 	}
 	log.Println("Logged in")
