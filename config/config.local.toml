@@ -3,6 +3,6 @@ title = "configuration for local environment"
 [database]
 host = "localhost"
 port = 35432
-user = "postgres_user"
+user = "postgres"
 #  password = "xxx" from environment variables
  
