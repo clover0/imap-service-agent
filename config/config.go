@@ -25,7 +25,11 @@ type DataBaseConfig struct {
 	Port int `toml:"port"`
 }
 
-// 環境変数として設定しておくこと
+/**
+New configuration for IMAP conncet.
+
+Configure variables on environmental variables.
+ */
 func NewIMAPConfig() IMAPConfig {
 	c := IMAPConfig{
 		os.Getenv("IMAP_AGENT_PJ_IMAP_HOST"),
@@ -40,6 +44,10 @@ func NewIMAPConfig() IMAPConfig {
 	return c
 }
 
+/**
+Initialization configuration for imap-agent project 
+ every environment.
+ */
 func InitConfig() {
 	var config Config
 	var configFile string
