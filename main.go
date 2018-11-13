@@ -8,5 +8,8 @@ import (
 func main(){
 	config.InitConfig()
 
-	lib.Do()
+	//lib.Do()
+	//lib.Sample()
+	//lib.SearchSample()
+	lib.RunIdleDaemon()
 }
