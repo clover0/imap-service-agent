@@ -23,6 +23,9 @@ type IMAPConfig struct {
 type DataBaseConfig struct {
 	Host string `toml:"host"`
 	Port int `toml:"port"`
+	User string `toml:"user"`
+	Password string
+	DBName string `toml:"dbName"`
 }
 
 /**
@@ -70,6 +73,8 @@ func InitConfig() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	
+	config.DB.Password = os.Getenv("IMAP_AGENT_PJ_DB_PASSWORD")
 
 	Conf = config
 }

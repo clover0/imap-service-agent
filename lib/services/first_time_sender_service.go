@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"github.com/emersion/go-imap"
 	"github.com/emersion/go-imap/client"
+	"github.com/jmoiron/sqlx"
 	"io"
 	"io/ioutil"
 	"log"
@@ -15,6 +16,7 @@ import (
 
 type FirstTimeSenderService struct {
 	c *client.Client
+	db *sqlx.DB
 }
 
 /**

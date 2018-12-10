@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"github.com/develop/imap-agent/config"
+	"github.com/develop/imap-agent/lib/db"
 	"github.com/develop/imap-agent/lib/services"
 	"github.com/emersion/go-imap-idle"
 	"github.com/emersion/go-imap/client"
@@ -14,6 +15,7 @@ import (
 // TODO: INBOXなどの指定を外部から指定できるようにする
 
 func RunIdleDaemon(){
+	db := db.NewDB()
 	conf := config.NewIMAPConfig()
 	connStr := fmt.Sprintf("%s:%s", conf.Host, conf.Port)
 
@@ -68,7 +70,7 @@ func RunIdleDaemon(){
 			fmt.Println("data:", update)
 			// 新たにコネクションを生成
 			newClient := newConnection()
-			services.Execute(newClient)
+			services.Execute(newClient, db)
 			// サービス実行後は切断
 			newClient.Close()
 		case err := <-done:

@@ -13,4 +13,5 @@ set -x IMAP_AGENT_PJ_IMAP_PORT 993
 set -x IMAP_AGENT_PJ_IMAP_USER imap.agent.test@gmail.com
 set -x IMAP_AGENT_PJ_IMAP_PASS xxxxx
 set -x IMAP_AGENT_PJ_IMAP_TLS_SERVERNAME imap.gmail.com
+set -x IMAP_AGENT_PJ_DB_PASSWORD password
 ```
