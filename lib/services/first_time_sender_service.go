@@ -3,6 +3,7 @@ package services
 import (
 	"bufio"
 	"bytes"
+	"github.com/develop/imap-agent/config"
 	"github.com/emersion/go-imap"
 	"github.com/emersion/go-imap/client"
 	"github.com/jmoiron/sqlx"
@@ -15,7 +16,8 @@ import (
 )
 
 type FirstTimeSenderService struct {
-	c *client.Client
+	c  *client.Client
+	ic config.IMAPConfig
 	db *sqlx.DB
 }
 
@@ -50,42 +52,37 @@ func (self *FirstTimeSenderService) execute() {
 
 		log.Println("Unseen messages:")
 		for msg := range messages {
+			fromAddress := msg.Envelope.From[0].MailboxName + "@" + msg.Envelope.From[0].HostName
 			log.Println("subject: " + msg.Envelope.Subject)
+			log.Println("from: ", fromAddress)
 			r := msg.GetBody(section)
-
-			log.Println("go target message:", r)
 
 			// copy reader
 			var copyBuf bytes.Buffer
 			tee := io.TeeReader(r, &copyBuf)
 
-			log.Println("go read message:...")
-			log.Println("before reader:", tee)
-
 			goMail, err2 := go_mail.ReadMessage(tee)
-
-			log.Println("after reader:", &copyBuf)
 
 			if err2 != nil {
 				log.Fatal(err2)
 			}
-			log.Println("goMail is:", goMail)
 			log.Println("Appending mail...")
-			log.Println("write buff header")
 			tp := textproto.NewReader(bufio.NewReader(&copyBuf))
 			mh, _ := tp.ReadMIMEHeader()
-			log.Println("before header is :", mh)
 
 			s := mh.Get("X-imap-agent-serviced");
 			if s != "" {
-				log.Println("X-imap-agent-serviced exists")
+				continue
+			}
+
+			isFoundSenderInfo := self.findOrInsert(fromAddress, self.ic.User)
+			if isFoundSenderInfo {
 				continue
 			}
 
 			mh.Set("Subject", "[初回送信者]"+msg.Envelope.Subject)
 			mh.Add("X-imap-agent-serviced", "first_time_sender")
-			mh.Del("Message-ID")
-			log.Println("header is :", mh)
+			mh.Del("Message-ID") // deleteしなくてもいいかも
 			header := ""
 			for k, v := range mh {
 				header = header + k + ": " + v[0] + "\r\n"
@@ -98,7 +95,6 @@ func (self *FirstTimeSenderService) execute() {
 			if err3 != nil {
 				log.Fatal(err3)
 			}
-			log.Println("write buff body")
 			buf.Write(byteHeader)
 			buf.Write([]byte("\r\n"))
 			byteBody, err4 := ioutil.ReadAll(goMail.Body)
@@ -107,9 +103,33 @@ func (self *FirstTimeSenderService) execute() {
 			}
 			buf.Write(byteBody)
 
+			log.Println("append mail.")
 			self.c.Append("INBOX", nil, msg.Envelope.Date, buf)
 
 		}
 	}
 }
 
+func (self *FirstTimeSenderService) findOrInsert(fromAddress string, account string) (found bool) {
+	log.Println("find or insert sender info.")
+	var count int
+	
+	tx := self.db.MustBegin()
+
+	err := tx.Get(&count, "SELECT COUNT(*) FROM senders WHERE mail_address = $1 AND to_account = $2", fromAddress, account)
+	if err != nil {
+		log.Fatal("select count error. err: ",err)
+	}
+	flag := false
+	if count > 0 {
+		flag = true
+	} else { // if not exist sender info, insert new record
+		tx.MustExec("INSERT INTO senders (mail_address, to_account, send_datetime) VALUES ($1, $2, current_timestamp)", fromAddress, account)
+		flag = false
+	}
+
+	tx.Commit()
+	log.Println("find or insert complete.")
+
+	return flag
+}

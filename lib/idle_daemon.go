@@ -15,7 +15,8 @@ import (
 // TODO: INBOXなどの指定を外部から指定できるようにする
 
 func RunIdleDaemon(){
-	db := db.NewDB()
+	dbis := db.NewDB()
+	//defer dbis.Close()
 	conf := config.NewIMAPConfig()
 	connStr := fmt.Sprintf("%s:%s", conf.Host, conf.Port)
 
@@ -70,7 +71,7 @@ func RunIdleDaemon(){
 			fmt.Println("data:", update)
 			// 新たにコネクションを生成
 			newClient := newConnection()
-			services.Execute(newClient, db)
+			services.Execute(newClient, conf, dbis)
 			// サービス実行後は切断
 			newClient.Close()
 		case err := <-done:

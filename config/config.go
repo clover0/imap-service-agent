@@ -24,7 +24,7 @@ type DataBaseConfig struct {
 	Host string `toml:"host"`
 	Port int `toml:"port"`
 	User string `toml:"user"`
-	Password string
+	Password string `toml:"password"`
 	DBName string `toml:"dbName"`
 }
 
@@ -74,7 +74,9 @@ func InitConfig() {
 		log.Fatal(err)
 	}
 	
-	config.DB.Password = os.Getenv("IMAP_AGENT_PJ_DB_PASSWORD")
+	if config.DB.Password == "" {
+		os.Getenv("IMAP_AGENT_PJ_DB_PASSWORD")
+	}
 
 	Conf = config
 }

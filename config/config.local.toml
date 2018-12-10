@@ -4,7 +4,7 @@ title = "configuration for local environment"
 host = "localhost"
 port = 35432
 user = "postgres"
-#  password = "xxx" from environment variables
+password = "password" # dont write! in production,staging environment. 
 dbName = "imap_agent"
 
  
