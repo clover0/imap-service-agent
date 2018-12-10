@@ -49,7 +49,7 @@ func RunIdleDaemon(){
 
 	// Create a channel to receive mailbox updates
 	// IDLEを行ったコネクションで他のコマンドは送信できない
-	// 切断するか別コネクションにする
+	// 切断するか別コネクションにする 現状別コネクション
 	updates := make(chan client.Update)
 	c.Updates = updates
 
