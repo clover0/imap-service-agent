@@ -15,3 +15,12 @@ set -x IMAP_AGENT_PJ_IMAP_PASS xxxxx
 set -x IMAP_AGENT_PJ_IMAP_TLS_SERVERNAME imap.gmail.com
 set -x IMAP_AGENT_PJ_DB_PASSWORD password
 ```
+
+# IMAP COMMAND sample
+
+```
+aa LOGIN アカウント パスワード
+aa select inbox
+aa store 106 flags.silent(\Deleted)
+aa expunge 
+```
