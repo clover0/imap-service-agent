@@ -1,9 +1,10 @@
 package services
 
 import (
-	"github.com/develop/imap-agent/config"
 	"github.com/emersion/go-imap/client"
 	"github.com/jmoiron/sqlx"
+
+	"github.com/develop/imap-agent/config"
 )
 
 func Execute(c *client.Client, ic config.IMAPConfig, db *sqlx.DB) {

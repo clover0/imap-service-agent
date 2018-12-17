@@ -3,18 +3,20 @@ package lib
 import (
 	"crypto/tls"
 	"fmt"
+	"log"
+	"os"
+
+	"github.com/emersion/go-imap-idle"
+	"github.com/emersion/go-imap/client"
+
 	"github.com/develop/imap-agent/config"
 	"github.com/develop/imap-agent/lib/db"
 	"github.com/develop/imap-agent/lib/services"
-	"github.com/emersion/go-imap-idle"
-	"github.com/emersion/go-imap/client"
-	"log"
-	"os"
 )
 
 // TODO: INBOXなどの指定を外部から指定できるようにする
 
-func RunIdleDaemon(){
+func RunIdleDaemon() {
 	dbis := db.NewDB()
 	//defer dbis.Close()
 	conf := config.NewIMAPConfig()
@@ -32,7 +34,7 @@ func RunIdleDaemon(){
 		log.Fatal(err)
 	}
 	log.Println("Connected")
-	
+
 	c.SetDebug(os.Stdout)
 
 	// Don't forget to logout
@@ -85,7 +87,7 @@ func RunIdleDaemon(){
 }
 
 // TODO: 最初からコネクションを作っておく方式にする
-func newConnection() *client.Client{
+func newConnection() *client.Client {
 	conf := config.NewIMAPConfig()
 	connStr := fmt.Sprintf("%s:%s", conf.Host, conf.Port)
 

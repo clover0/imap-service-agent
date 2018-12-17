@@ -29,10 +29,6 @@ type FirstTimeSenderService struct {
 	db *sqlx.DB
 }
 
-/**
-メモ
-未読にするには Seenフラグをとる
- */
 // execute executes check if first or already sender, and do service.
 func (self *FirstTimeSenderService) execute() {
 	log.Println("FirstTimeSenderService starting process...")
@@ -92,10 +88,10 @@ func (self *FirstTimeSenderService) execute() {
 			mh.Set("Message-ID", newMessageId(mh.Get("Message-ID")))
 			//mh.Del("Date")
 			mh.Del("X-Gm-Message-State")
-			mh.Del("X-Google-Smtp-Source")
+			//mh.Del("X-Google-Smtp-Source")
 			//mh.Del("Delivered-To")
 			//mh.Del("From")
-			mh.Del("To")
+			//mh.Del("To")
 
 			// build header from header map
 			header := ""
