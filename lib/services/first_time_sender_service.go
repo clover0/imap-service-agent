@@ -130,7 +130,7 @@ func (self *FirstTimeSenderService) execute() {
 			self.c.Expunge(nil)
 
 			log.Println("append mail.")
-			self.c.Append("INBOX", nil, date, buf)
+			self.c.Append(self.ic.MailBox, nil, date, buf)
 
 		}
 	}

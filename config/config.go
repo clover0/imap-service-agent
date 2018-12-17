@@ -19,6 +19,7 @@ type IMAPConfig struct {
 	User string
 	Password string
 	Tlsn string
+	MailBox string
 }
 
 type DataBaseConfig struct {
@@ -37,6 +38,7 @@ func NewIMAPConfig() IMAPConfig {
 		os.Getenv("IMAP_AGENT_PJ_IMAP_USER"),
 		os.Getenv("IMAP_AGENT_PJ_IMAP_PASS"),
 		os.Getenv("IMAP_AGENT_PJ_IMAP_TLS_SERVERNAME"),
+		os.Getenv("IMAP_AGENT_PJ_IMAP_MAILBOX"),
 	}
 	if c.Port == "" {
 		c.Port = "993"

@@ -7,6 +7,7 @@ import (
 	"github.com/develop/imap-agent/config"
 )
 
+// Execute executes all services
 func Execute(c *client.Client, ic config.IMAPConfig, db *sqlx.DB) {
 	ftss := FirstTimeSenderService{
 		c,

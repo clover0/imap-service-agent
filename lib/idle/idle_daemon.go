@@ -1,4 +1,4 @@
-package lib
+package idle
 
 import (
 	"crypto/tls"
@@ -14,8 +14,8 @@ import (
 	"github.com/develop/imap-agent/lib/services"
 )
 
-// TODO: INBOXなどの指定を外部から指定できるようにする
-
+// Run runs imap idle.
+// when updating mailbox, this does services.
 func Run() {
 	dbis := db.NewDB()
 	defer dbis.Close()
@@ -23,7 +23,7 @@ func Run() {
 	conf := config.NewIMAPConfig()
 	connStr := fmt.Sprintf("%s:%s", conf.Host, conf.Port)
 
-	// 本番運用の際はスキップしてよいのか確認すること
+	// confirm this skipping verify on production env
 	tlsc := &tls.Config{InsecureSkipVerify: true}
 	if conf.Tlsn != "" {
 		tlsc.ServerName = conf.Tlsn
@@ -46,15 +46,13 @@ func Run() {
 	}
 	log.Println("Logged in")
 	// Select a mailbox
-	if _, err := c.Select("INBOX", false); err != nil {
+	if _, err := c.Select(conf.MailBox, false); err != nil {
 		log.Fatal(err)
 	}
 
 	idleClient := idle.NewClient(c)
 
 	// Create a channel to receive mailbox updates
-	// IDLEを行ったコネクションで他のコマンドは送信できない
-	// 切断するか別コネクションにする 現状別コネクション
 	updates := make(chan client.Update)
 	c.Updates = updates
 	
@@ -73,7 +71,6 @@ func Run() {
 		select {
 		case update := <-updates:
 			log.Println("New update:", update)
-			fmt.Println("data:", update)
 			services.Execute(con4Service, conf, dbis)
 		case err := <-done:
 			if err != nil {
@@ -111,7 +108,7 @@ func newConnection() *client.Client {
 	}
 	log.Println("Logged in")
 	// Select a mailbox
-	if _, err := c.Select("INBOX", false); err != nil {
+	if _, err := c.Select(conf.MailBox, false); err != nil {
 		log.Fatal(err)
 	}
 
