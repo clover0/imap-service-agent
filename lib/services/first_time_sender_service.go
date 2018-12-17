@@ -3,10 +3,6 @@ package services
 import (
 	"bufio"
 	"bytes"
-	"github.com/develop/imap-agent/config"
-	"github.com/emersion/go-imap"
-	"github.com/emersion/go-imap/client"
-	"github.com/jmoiron/sqlx"
 	"io"
 	"io/ioutil"
 	"log"
@@ -15,6 +11,12 @@ import (
 	"net/textproto"
 	"strconv"
 	"strings"
+
+	"github.com/emersion/go-imap"
+	"github.com/emersion/go-imap/client"
+	"github.com/jmoiron/sqlx"
+
+	"github.com/develop/imap-agent/config"
 )
 
 const (
@@ -31,6 +33,7 @@ type FirstTimeSenderService struct {
 メモ
 未読にするには Seenフラグをとる
  */
+// execute executes check if first or already sender, and do service.
 func (self *FirstTimeSenderService) execute() {
 	log.Println("FirstTimeSenderService starting process...")
 
@@ -137,6 +140,7 @@ func (self *FirstTimeSenderService) execute() {
 	}
 }
 
+// findOrInsert finds or insert new record about mail sender info.
 func (self *FirstTimeSenderService) findOrInsert(fromAddress string, account string) (found bool) {
 	log.Println("find or insert sender info.")
 	var count int
@@ -163,6 +167,7 @@ func (self *FirstTimeSenderService) findOrInsert(fromAddress string, account str
 	return flag
 }
 
+// newMessageId creates a new MessageId joining original MessageId
 func newMessageId(original string) string {
 	r := strings.Replace(original, "<", "", -1)
 	r = strings.Replace(r, ">", "", -1)

@@ -8,6 +8,7 @@ import (
 
 var Conf Config
 
+// from toml file config.
 type Config struct {
 	DB DataBaseConfig `toml:"database"`
 }
@@ -28,11 +29,7 @@ type DataBaseConfig struct {
 	DBName string `toml:"dbName"`
 }
 
-/**
-New configuration for IMAP conncet.
-
-Configure variables on environmental variables.
- */
+// NewIMAPConfig creates a new config for imap connectin.
 func NewIMAPConfig() IMAPConfig {
 	c := IMAPConfig{
 		os.Getenv("IMAP_AGENT_PJ_IMAP_HOST"),
