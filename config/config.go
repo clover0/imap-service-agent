@@ -14,20 +14,20 @@ type Config struct {
 }
 
 type IMAPConfig struct {
-	Host string
-	Port string
-	User string
+	Host     string
+	Port     string
+	User     string
 	Password string
-	Tlsn string
-	MailBox string
+	Tlsn     string
+	MailBox  string
 }
 
 type DataBaseConfig struct {
-	Host string `toml:"host"`
-	Port int `toml:"port"`
-	User string `toml:"user"`
+	Host     string `toml:"host"`
+	Port     int    `toml:"port"`
+	User     string `toml:"user"`
 	Password string `toml:"password"`
-	DBName string `toml:"dbName"`
+	DBName   string `toml:"dbName"`
 }
 
 // NewIMAPConfig creates a new config for imap connectin.
@@ -68,16 +68,14 @@ func InitConfig() {
 		configFile = "config.local.toml"
 	}
 
-	_, err := toml.DecodeFile(configDir + "/" + configFile, &config)
+	_, err := toml.DecodeFile(configDir+"/"+configFile, &config)
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	if config.DB.Password == "" {
 		os.Getenv("IMAP_AGENT_PJ_DB_PASSWORD")
 	}
 
 	Conf = config
 }
-
-

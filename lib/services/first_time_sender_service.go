@@ -21,6 +21,7 @@ import (
 
 const (
 	serviceName string = "first_time_sender"
+	CRLF        string = "\r\n"
 )
 
 type FirstTimeSenderService struct {
@@ -96,7 +97,7 @@ func (self *FirstTimeSenderService) execute() {
 			// build header from header map
 			header := ""
 			for k, v := range mh {
-				header = header + k + ": " + v[0] + "\r\n"
+				header = header + k + ": " + v[0] + CRLF
 			}
 			byteHeader, readHeaderErr := ioutil.ReadAll(strings.NewReader(header))
 			if readHeaderErr != nil {
@@ -107,7 +108,7 @@ func (self *FirstTimeSenderService) execute() {
 			buf := new(bytes.Buffer)
 
 			buf.Write(byteHeader)
-			buf.Write([]byte("\r\n"))
+			buf.Write([]byte(CRLF))
 
 			byteBody, err4 := ioutil.ReadAll(goMail.Body)
 			if err4 != nil {
@@ -130,8 +131,7 @@ func (self *FirstTimeSenderService) execute() {
 			self.c.Expunge(nil)
 
 			log.Println("append mail.")
-			self.c.Append(self.ic.MailBox, nil, date, buf)
-
+			self.c.Append(self.ic.MailBox, []string{imap.RecentFlag}, date, buf)
 		}
 	}
 }
@@ -147,20 +147,20 @@ func (self *FirstTimeSenderService) findOrInsert(fromAddress string, account str
 	if err != nil {
 		log.Fatal("select count error. err: ", err)
 	}
-	flag := false
+	found = false
 	if count > 0 {
 		log.Println("found sender info")
-		flag = true
+		found = true
 	} else { // if not exist sender info, insert new record
 		tx.MustExec("INSERT INTO senders (mail_address, to_account, send_datetime) VALUES ($1, $2, current_timestamp)", fromAddress, account)
 		log.Println("insert new record to sender table.")
-		flag = false
+		found = false
 	}
 
 	tx.Commit()
 	log.Println("find or insert complete.")
 
-	return flag
+	return found
 }
 
 // newMessageId creates a new MessageId joining original MessageId
