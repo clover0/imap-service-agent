@@ -7,5 +7,5 @@ import (
 
 func main(){
 	config.InitConfig()
-	lib.RunIdleDaemon()
+	lib.Run()
 }

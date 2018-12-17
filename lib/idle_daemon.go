@@ -16,9 +16,10 @@ import (
 
 // TODO: INBOXなどの指定を外部から指定できるようにする
 
-func RunIdleDaemon() {
+func Run() {
 	dbis := db.NewDB()
-	//defer dbis.Close()
+	defer dbis.Close()
+
 	conf := config.NewIMAPConfig()
 	connStr := fmt.Sprintf("%s:%s", conf.Host, conf.Port)
 
@@ -37,7 +38,6 @@ func RunIdleDaemon() {
 
 	c.SetDebug(os.Stdout)
 
-	// Don't forget to logout
 	defer c.Logout()
 
 	// Login
@@ -57,12 +57,15 @@ func RunIdleDaemon() {
 	// 切断するか別コネクションにする 現状別コネクション
 	updates := make(chan client.Update)
 	c.Updates = updates
+	
 
 	// Start idling
 	done := make(chan error, 1)
 	go func() {
 		done <- idleClient.IdleWithFallback(nil, 0)
 	}()
+
+	con4Service := newConnection()
 
 	// Listen for updates
 	for {
@@ -71,11 +74,7 @@ func RunIdleDaemon() {
 		case update := <-updates:
 			log.Println("New update:", update)
 			fmt.Println("data:", update)
-			// 新たにコネクションを生成
-			newClient := newConnection()
-			services.Execute(newClient, conf, dbis)
-			// サービス実行後は切断
-			newClient.Close()
+			services.Execute(con4Service, conf, dbis)
 		case err := <-done:
 			if err != nil {
 				log.Fatal(err)
@@ -86,7 +85,7 @@ func RunIdleDaemon() {
 	}
 }
 
-// TODO: 最初からコネクションを作っておく方式にする
+
 func newConnection() *client.Client {
 	conf := config.NewIMAPConfig()
 	connStr := fmt.Sprintf("%s:%s", conf.Host, conf.Port)
