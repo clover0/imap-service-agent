@@ -47,9 +47,9 @@ func NewIMAPConfig() IMAPConfig {
 }
 
 /**
-Initialization configuration for imap-agent project 
+Initialization configuration for imap-agent project
  every environment.
- */
+*/
 func InitConfig() {
 	var config Config
 	var configFile string

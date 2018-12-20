@@ -55,7 +55,6 @@ func Run() {
 	// Create a channel to receive mailbox updates
 	updates := make(chan client.Update)
 	c.Updates = updates
-	
 
 	// Start idling
 	done := make(chan error, 1)
@@ -81,7 +80,6 @@ func Run() {
 		}
 	}
 }
-
 
 func newConnection() *client.Client {
 	conf := config.NewIMAPConfig()

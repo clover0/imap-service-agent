@@ -72,7 +72,7 @@ func (self *FirstTimeSenderService) execute() {
 			tp := textproto.NewReader(bufio.NewReader(&copyBuf))
 			mh, _ := tp.ReadMIMEHeader()
 
-			s := mh.Get("X-imap-agent-serviced");
+			s := mh.Get("X-imap-agent-serviced")
 			if strings.Contains(s, serviceName) {
 				continue
 			}

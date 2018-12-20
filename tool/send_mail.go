@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func main(){
+func main() {
 	fmt.Println("sending mail...")
 	m := mail{
 		from:     "xxx@gmail.com",
@@ -22,7 +22,7 @@ func main(){
 		log.Println(err)
 		os.Exit(1)
 	}
-	
+
 }
 
 type mail struct {
