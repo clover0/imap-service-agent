@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 
 # The name of the executable (default is current directory name)
-TARGET := $(shell echo $${PWD\#\#*/})
+TARGET :="main.go"
 .DEFAULT_GOAL: $(TARGET)
 
 # These will be provided to the target
@@ -45,4 +45,4 @@ check:
 	@go tool vet ${SRC}
 
 run: install
-	@$(TARGET)
+	@go run $(TARGET)
