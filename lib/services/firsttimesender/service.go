@@ -26,7 +26,7 @@ const (
 
 type FirstTimeSenderService struct {
 	Cli  *client.Client
-	ImapConf config.IMAPConfig
+	ImapConf *config.IMAPConfig
 	Db *sqlx.DB
 }
 
@@ -34,7 +34,7 @@ func (self *FirstTimeSenderService) BeforeService(){
 	log.Println("before service")
 }
 
-// doService executes check if first or already email sender, and does service.
+// DoService executes check if first or already email sender, and does service.
 func (self *FirstTimeSenderService) DoService() {
 	log.Printf("%s service starting process...", serviceName)
 

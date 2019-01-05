@@ -17,7 +17,7 @@ func (self Executor) Execute (service Service) {
 }
 
 // Execute executes all services
-func Execute(c *client.Client, ic config.IMAPConfig, db *sqlx.DB) {
+func Execute(c *client.Client, ic *config.IMAPConfig, db *sqlx.DB) {
 	e := Executor{}
 	ftss := &firsttimesender.FirstTimeSenderService{c,ic,db}
 	e.Execute(ftss)

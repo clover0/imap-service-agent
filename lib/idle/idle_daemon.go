@@ -62,15 +62,15 @@ func Run() {
 		done <- idleClient.IdleWithFallback(nil, 0)
 	}()
 
-	con4Service := newConnection()
-
 	// Listen for updates
 	for {
 		log.Println("Idling...")
 		select {
 		case update := <-updates:
 			log.Println("New update:", update)
-			services.Execute(con4Service, conf, dbis)
+			con4Service := newConnection()
+			services.Execute(con4Service, &conf, dbis)
+			con4Service.Logout()
 		case err := <-done:
 			if err != nil {
 				log.Fatal(err)
