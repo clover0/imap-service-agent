@@ -1,4 +1,4 @@
-package services
+package firsttimesender
 
 import (
 	"bufio"
@@ -25,20 +25,24 @@ const (
 )
 
 type FirstTimeSenderService struct {
-	c  *client.Client
-	ic config.IMAPConfig
-	db *sqlx.DB
+	Cli  *client.Client
+	ImapConf config.IMAPConfig
+	Db *sqlx.DB
 }
 
-// execute executes check if first or already sender, and do service.
-func (self *FirstTimeSenderService) execute() {
-	log.Println("FirstTimeSenderService starting process...")
+func (self *FirstTimeSenderService) BeforeService(){
+	log.Println("before service")
+}
+
+// doService executes check if first or already email sender, and does service.
+func (self *FirstTimeSenderService) DoService() {
+	log.Printf("%s service starting process...", serviceName)
 
 	cri := imap.NewSearchCriteria()
 	cri.WithoutFlags = []string{imap.SeenFlag}
 
 	log.Println("search mails...")
-	ids, searchErr := self.c.Search(cri)
+	ids, searchErr := self.Cli.Search(cri)
 	if searchErr != nil {
 		log.Fatal(searchErr)
 	}
@@ -53,7 +57,7 @@ func (self *FirstTimeSenderService) execute() {
 		section := &imap.BodySectionName{Peek: true}
 		done := make(chan error, 1)
 		go func() {
-			done <- self.c.Fetch(seqset, []imap.FetchItem{imap.FetchEnvelope, imap.FetchFlags, imap.FetchInternalDate, section.FetchItem()}, messages)
+			done <- self.Cli.Fetch(seqset, []imap.FetchItem{imap.FetchEnvelope, imap.FetchFlags, imap.FetchInternalDate, section.FetchItem()}, messages)
 		}()
 
 		log.Println("Unseen messages:")
@@ -78,7 +82,7 @@ func (self *FirstTimeSenderService) execute() {
 			}
 
 			fromAddress := msg.Envelope.From[0].MailboxName + "@" + msg.Envelope.From[0].HostName
-			isFoundSenderInfo := self.findOrInsert(fromAddress, self.ic.User)
+			isFoundSenderInfo := self.findOrInsert(fromAddress, self.ImapConf.User)
 			if isFoundSenderInfo {
 				log.Println("skip append mail.")
 				continue
@@ -127,13 +131,17 @@ func (self *FirstTimeSenderService) execute() {
 			log.Println("delete original mail: ", msg.SeqNum)
 			deleteitem := imap.FormatFlagsOp(imap.AddFlags, true)
 			deleteflags := []interface{}{imap.DeletedFlag}
-			self.c.Store(seqset, deleteitem, deleteflags, nil)
-			self.c.Expunge(nil)
+			self.Cli.Store(seqset, deleteitem, deleteflags, nil)
+			self.Cli.Expunge(nil)
 
 			log.Println("append mail.")
-			self.c.Append(self.ic.MailBox, []string{imap.RecentFlag}, date, buf)
+			self.Cli.Append(self.ImapConf.MailBox, []string{imap.RecentFlag}, date, buf)
 		}
 	}
+}
+
+func (self *FirstTimeSenderService) AfterService(){
+	log.Println("after service")
 }
 
 // findOrInsert finds or insert new record about mail sender info.
@@ -141,7 +149,7 @@ func (self *FirstTimeSenderService) findOrInsert(fromAddress string, account str
 	log.Println("find or insert sender info.")
 	var count int
 
-	tx := self.db.MustBegin()
+	tx := self.Db.MustBegin()
 
 	err := tx.Get(&count, "SELECT COUNT(*) FROM senders WHERE mail_address = $1 AND to_account = $2", fromAddress, account)
 	if err != nil {

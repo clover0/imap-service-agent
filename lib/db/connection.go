@@ -25,7 +25,6 @@ func NewDB() *sqlx.DB {
 		password,
 		dbName,
 	)
-	log.Println("db config: ", ds)
 	db, err := sqlx.Connect("postgres", ds)
 	if err != nil {
 		log.Fatalln(err)
