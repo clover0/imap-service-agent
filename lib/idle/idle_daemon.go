@@ -71,7 +71,7 @@ func Run() {
 		select {
 		case update := <-updates:
 			log.Println("New update:", update)
-			con4Service := newConnection()
+			con4Service := newConnection(conf)
 			services.Execute(con4Service, &conf, dbis)
 			con4Service.Logout()
 		case err := <-done:
@@ -84,8 +84,7 @@ func Run() {
 	}
 }
 
-func newConnection() *client.Client {
-	conf := config.NewIMAPConfig()
+func newConnection(conf config.IMAPConfig) *client.Client {
 	connStr := fmt.Sprintf("%s:%s", conf.Host, conf.Port)
 
 	// 本番運用の際はスキップしてよいのか確認すること
@@ -117,8 +116,8 @@ func newConnection() *client.Client {
 }
 
 func NewIMAPConfigFrom(db *sqlx.DB) config.IMAPConfig {
-	mailAddress := "imap_agent_test_y@yahoo.co.jp"
-	//mailAddress := "imap.agent.test@gmail.com"
+	//mailAddress := "imap_agent_test_y@yahoo.co.jp"
+	mailAddress := "imap.agent.test@gmail.com"
 	account := models.Account{}
 	err := db.Get(&account, "SELECT * FROM accounts WHERE mail_address = $1", mailAddress)
 	if err != nil {
