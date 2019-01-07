@@ -14,6 +14,7 @@ import (
 
 	"github.com/emersion/go-imap"
 	"github.com/emersion/go-imap/client"
+	"github.com/emersion/go-imap-move"
 	"github.com/jmoiron/sqlx"
 
 	"github.com/develop/imap-agent/config"
@@ -22,15 +23,16 @@ import (
 const (
 	serviceName string = "first_time_sender"
 	CRLF        string = "\r\n"
+	TRASH       string = "[Gmail]/ゴミ箱"
 )
 
 type FirstTimeSenderService struct {
-	Cli  *client.Client
+	Cli      *client.Client
 	ImapConf *config.IMAPConfig
-	Db *sqlx.DB
+	Db       *sqlx.DB
 }
 
-func (self *FirstTimeSenderService) BeforeService(){
+func (self *FirstTimeSenderService) BeforeService() {
 	log.Println("before service")
 }
 
@@ -131,8 +133,23 @@ func (self *FirstTimeSenderService) DoService() {
 			log.Println("delete original mail: ", msg.SeqNum)
 			deleteitem := imap.FormatFlagsOp(imap.AddFlags, true)
 			deleteflags := []interface{}{imap.DeletedFlag}
-			self.Cli.Store(seqset, deleteitem, deleteflags, nil)
+			// 単純削除ではなくてゴミ箱へ移動してそこで削除
+			//self.Cli.Store(seqset, deleteitem, deleteflags, nil)
+			
+			moveCli := move.NewClient(self.Cli)
+			moveSeq := new(imap.SeqSet)
+			moveSeq.AddNum(msg.SeqNum)
+			log.Printf("uid: %d", msg.Uid)
+			moveCli.Move(moveSeq, TRASH)
+			self.Cli.Select(TRASH, false)
+			se := new(imap.SeqSet)
+			se.AddNum(msg.Uid)
+			self.Cli.UidStore(se, deleteitem, deleteflags, nil)
+
 			self.Cli.Expunge(nil)
+
+			// 元のボックスにもどっておく
+			self.Cli.Select("INBOX", false)
 
 			log.Println("append mail.")
 			self.Cli.Append(self.ImapConf.MailBox, []string{imap.RecentFlag}, date, buf)
@@ -140,7 +157,7 @@ func (self *FirstTimeSenderService) DoService() {
 	}
 }
 
-func (self *FirstTimeSenderService) AfterService(){
+func (self *FirstTimeSenderService) AfterService() {
 	log.Println("after service")
 }
 
