@@ -94,7 +94,7 @@ func (self *FirstTimeSenderService) DoService() {
 			mh.Set("X-imap-agent-serviced", serviceName)
 			mh.Set("Message-ID", newMessageId(mh.Get("Message-ID")))
 			//mh.Del("Date")
-			mh.Del("X-Gm-Message-State")
+			//mh.Del("X-Gm-Message-State")
 			//mh.Del("X-Google-Smtp-Source")
 			//mh.Del("Delivered-To")
 			//mh.Del("From")
@@ -110,7 +110,7 @@ func (self *FirstTimeSenderService) DoService() {
 				log.Fatal(readHeaderErr)
 			}
 
-			// for build body
+			// for building body
 			buf := new(bytes.Buffer)
 
 			buf.Write(byteHeader)
