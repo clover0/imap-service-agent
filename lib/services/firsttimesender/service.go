@@ -3,6 +3,10 @@ package firsttimesender
 import (
 	"bufio"
 	"bytes"
+	"github.com/emersion/go-imap"
+	"github.com/emersion/go-imap-move"
+	"github.com/emersion/go-imap/client"
+	"github.com/jmoiron/sqlx"
 	"io"
 	"io/ioutil"
 	"log"
@@ -11,12 +15,6 @@ import (
 	"net/textproto"
 	"strconv"
 	"strings"
-	"time"
-
-	"github.com/emersion/go-imap"
-	"github.com/emersion/go-imap/client"
-	"github.com/emersion/go-imap-move"
-	"github.com/jmoiron/sqlx"
 
 	"github.com/develop/imap-agent/config"
 )
@@ -24,8 +22,8 @@ import (
 const (
 	serviceName string = "first_time_sender"
 	CRLF        string = "\r\n"
-	//TRASH       string = "[Gmail]/ゴミ箱" // gmail
-	TRASH string = "Trash" // yahoo
+	TRASH       string = "[Gmail]/ゴミ箱" // gmail
+	//TRASH string = "Trash" // yahoo
 )
 
 type FirstTimeSenderService struct {
@@ -124,8 +122,7 @@ func (self *FirstTimeSenderService) DoService() {
 			}
 			buf.Write(byteBody)
 
-			//date := new(time.Time)
-			//date := msg.Envelope.Date
+			date := msg.Envelope.Date
 
 			seqset := new(imap.SeqSet)
 			seqset.AddNum(msg.SeqNum)
