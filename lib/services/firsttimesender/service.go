@@ -11,6 +11,7 @@ import (
 	"net/textproto"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/emersion/go-imap"
 	"github.com/emersion/go-imap/client"
@@ -23,7 +24,8 @@ import (
 const (
 	serviceName string = "first_time_sender"
 	CRLF        string = "\r\n"
-	TRASH       string = "[Gmail]/ゴミ箱"
+	//TRASH       string = "[Gmail]/ゴミ箱" // gmail
+	TRASH string = "Trash" // yahoo
 )
 
 type FirstTimeSenderService struct {
@@ -59,7 +61,7 @@ func (self *FirstTimeSenderService) DoService() {
 		section := &imap.BodySectionName{Peek: true}
 		done := make(chan error, 1)
 		go func() {
-			done <- self.Cli.Fetch(seqset, []imap.FetchItem{imap.FetchEnvelope, imap.FetchFlags, imap.FetchInternalDate, section.FetchItem()}, messages)
+			done <- self.Cli.Fetch(seqset, []imap.FetchItem{imap.FetchEnvelope, imap.FetchUid, imap.FetchFlags, imap.FetchInternalDate, section.FetchItem()}, messages)
 		}()
 
 		log.Println("Unseen messages:")
@@ -123,19 +125,20 @@ func (self *FirstTimeSenderService) DoService() {
 			buf.Write(byteBody)
 
 			//date := new(time.Time)
-			date := msg.Envelope.Date
+			//date := msg.Envelope.Date
 
 			seqset := new(imap.SeqSet)
 			seqset.AddNum(msg.SeqNum)
 			//log.Println("copy original mail to trash: ", msg.SeqNum)
 			//self.c.Copy(seqset, "[Gmail]/ゴミ箱")
 
+			// TODO strategy. gmail or yahoo or ...
 			log.Println("delete original mail: ", msg.SeqNum)
 			deleteitem := imap.FormatFlagsOp(imap.AddFlags, true)
 			deleteflags := []interface{}{imap.DeletedFlag}
 			// 単純削除ではなくてゴミ箱へ移動してそこで削除
 			//self.Cli.Store(seqset, deleteitem, deleteflags, nil)
-			
+
 			moveCli := move.NewClient(self.Cli)
 			moveSeq := new(imap.SeqSet)
 			moveSeq.AddNum(msg.SeqNum)
@@ -149,7 +152,7 @@ func (self *FirstTimeSenderService) DoService() {
 			self.Cli.Expunge(nil)
 
 			// 元のボックスにもどっておく
-			self.Cli.Select("INBOX", false)
+			self.Cli.Select(self.ImapConf.MailBox, false)
 
 			log.Println("append mail.")
 			self.Cli.Append(self.ImapConf.MailBox, []string{imap.RecentFlag}, date, buf)
