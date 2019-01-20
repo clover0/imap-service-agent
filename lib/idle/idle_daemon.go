@@ -39,7 +39,7 @@ func Run() {
 	}
 	log.Println("Connected")
 
-	c.SetDebug(os.Stdout)
+	//c.SetDebug(os.Stdout)
 
 	defer c.Logout()
 
